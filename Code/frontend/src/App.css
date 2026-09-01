@@ -53,9 +53,24 @@ body {
 
 .main-content {
   width: 100%;
-  max-width: 1050px;
+  max-width: 1400px;
 
+  margin: 0 auto;
   padding: 28px 42px;
+}
+
+.top-layout {
+  display: grid;
+
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+
+  gap: 24px;
+
+  align-items: start;
+}
+
+.search-column {
+  min-width: 0;
 }
 
 
@@ -210,7 +225,7 @@ body {
 }
 
 
-/* ---------------- STATUS ---------------- */
+/* ---------------- STATUS MESSAGE ---------------- */
 
 .status-message {
   display: flex;
@@ -259,6 +274,67 @@ body {
 
 .status-error .status-icon {
   background: #dc3545;
+}
+
+
+/* ---------------- EXECUTION STATUS ---------------- */
+
+.execution-section {
+  background: #ffffff;
+
+  border: 1px solid #dce5f0;
+  border-radius: 12px;
+
+  padding: 22px;
+
+  min-height: 260px;
+
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.execution-heading {
+  margin: 0 0 24px 0;
+
+  color: #172554;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.execution-status {
+  padding-top: 4px;
+}
+
+.execution-title {
+  margin-bottom: 8px;
+
+  color: #168563;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.execution-description {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+
+/* ---------------- TABLET ---------------- */
+
+@media (max-width: 900px) {
+  .top-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .execution-section {
+    min-height: 160px;
+  }
 }
 
 

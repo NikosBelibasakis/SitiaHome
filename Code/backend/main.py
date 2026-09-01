@@ -1,8 +1,7 @@
-from fastapi import FastAPI
+from fastapi import Body, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-from models.req_and_valid import process_and_validate_requirements
+from components.prop_search import search_xe_properties
+from components.req_and_valid import (process_and_validate_requirements, UserRequirements)
 
 
 app = FastAPI()
@@ -16,10 +15,18 @@ app.add_middleware(
 )
 
 
-class SearchRequest(BaseModel):
-    prompt: str
-
-
 @app.post("/search")
-def search(request: SearchRequest):
-    return process_and_validate_requirements(request.prompt)
+def search(prompt: str = Body(...)):
+
+    return process_and_validate_requirements(prompt)
+
+
+
+@app.post("/search-properties")
+def search_properties(requirements: UserRequirements = Body(...)):
+    matching_urls = search_xe_properties(requirements)
+
+    if matching_urls:
+        return True 
+
+    return False

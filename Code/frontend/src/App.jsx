@@ -7,10 +7,17 @@ function App() {
   const [isValid, setIsValid] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const [executionTitle, setExecutionTitle] = useState("");
+  const [executionDescription, setExecutionDescription] = useState("");
+
   async function handleSearch() {
     if (!prompt.trim()) {
       setIsValid(false);
       setMessage("Παρακαλώ περιγράψτε την κατοικία που αναζητάτε.");
+
+      setExecutionTitle("");
+      setExecutionDescription("");
+
       return;
     }
 
@@ -18,31 +25,68 @@ function App() {
     setMessage("");
     setIsValid(null);
 
+    setExecutionTitle("ΕΛΕΓΧΟΣ ΑΙΤΗΜΑΤΟΣ");
+    setExecutionDescription("Ελέγχεται το αίτημα που έχετε καταχωρήσει ως προς την εγκυρότητά του.");
+
     try {
       const response = await fetch("http://127.0.0.1:8000/search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          prompt: prompt,
-        }),
+        body: JSON.stringify(prompt),
       });
 
-      const data = await response.json();
+      const requirements = await response.json();
 
-      if (data.legit_prompt) {
+      if (requirements.legit_prompt) {
         setIsValid(true);
-        setMessage(
-          "Το αίτημα είναι έγκυρο. Η αναζήτηση μπορεί να προχωρήσει."
+        setMessage("");
+
+        setExecutionTitle("ΑΝΑΖΗΤΗΣΗ ΑΚΙΝΗΤΩΝ");
+        setExecutionDescription(
+          "Έγκυρο Αίτημα. Πραγματοποιείται αναζήτηση ακινήτων βάσει των προτιμήσεων και απαιτήσεών σας."
         );
+
+        const propertiesResponse = await fetch(
+          "http://127.0.0.1:8000/search-properties",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requirements),
+          }
+        );
+
+        const propertiesFound = await propertiesResponse.json();
+
+        if (propertiesFound) {
+          setExecutionTitle("ΔΗΜΙΟΥΡΓΙΑ ΠΡΟΤΑΣΕΩΝ");
+          setExecutionDescription(
+            "Βρέθηκαν διαθέσιμες κατοικίες που πληρούν τις βασικές απαιτήσεις σας. Τώρα δημιουργούνται προτάσεις για την καλύτερη δυνατή επιλογή."
+          );
+        } else {
+          setExecutionTitle("ΔΕΝ ΒΡΕΘΗΚΑΝ ΑΚΙΝΗΤΑ");
+          setExecutionDescription(
+            "Δεν βρέθηκε κατοικία που να πληροί τις απαιτήσεις σας. Παρακαλώ υποβάλετε νέο αίτημα."
+          );
+        }
       } else {
         setIsValid(false);
-        setMessage(data.validation_message);
+        setMessage(requirements.validation_message);
+
+        setExecutionTitle("");
+        setExecutionDescription("");
       }
     } catch (error) {
       setIsValid(false);
-      setMessage("Παρουσιάστηκε πρόβλημα κατά την επικοινωνία με τον server.");
+      setMessage(
+        "Παρουσιάστηκε πρόβλημα κατά την επικοινωνία με τον server."
+      );
+
+      setExecutionTitle("");
+      setExecutionDescription("");
     } finally {
       setLoading(false);
     }
@@ -62,52 +106,74 @@ function App() {
       </header>
 
       <main className="main-content">
-        <section className="search-section">
-          <div className="section-title">
-            <span className="search-icon">⌕</span>
-            <h2>Περιγραφή Αναζήτησης</h2>
+        <div className="top-layout">
+          <div className="search-column">
+            <section className="search-section">
+              <div className="section-title">
+                <span className="search-icon">⌕</span>
+                <h2>Περιγραφή Αναζήτησης</h2>
+              </div>
+
+              <textarea
+                className="search-textarea"
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                placeholder="π.χ. Ψάχνω κατοικία στη Σητεία με ενοίκιο 400€-600€, 2 δωμάτια, κοντά στο κέντρο..."
+              />
+
+              <div className="search-footer">
+                <div className="requirements-info">
+                  <span className="info-icon">i</span>
+
+                  <span>
+                    <strong>Υποχρεωτικά στοιχεία:</strong> μέγιστο ενοίκιο,
+                    ελάχιστο ενοίκιο, αριθμός δωματίων
+                  </span>
+                </div>
+
+                <button
+                  className="search-button"
+                  onClick={handleSearch}
+                  disabled={loading}
+                >
+                  {loading ? "Επεξεργασία..." : "Αναζήτηση"}
+                </button>
+              </div>
+            </section>
+
+            {message && (
+              <div
+                className={`status-message ${
+                  isValid ? "status-success" : "status-error"
+                }`}
+              >
+                <span className="status-icon">
+                  {isValid ? "✓" : "!"}
+                </span>
+
+                <span>{message}</span>
+              </div>
+            )}
           </div>
 
-          <textarea
-            className="search-textarea"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-            placeholder="π.χ. Ψάχνω κατοικία στη Σητεία με ενοίκιο 400€-600€, 2 δωμάτια, κοντά στο κέντρο..."
-          />
+          <section className="execution-section">
+            <h2 className="execution-heading">
+              <center>ΚΑΤΑΣΤΑΣΗ ΕΚΤΕΛΕΣΗΣ</center>
+            </h2>
 
-          <div className="search-footer">
-            <div className="requirements-info">
-              <span className="info-icon">i</span>
+            {executionTitle && (
+              <div className="execution-status">
+                <div className="execution-title">
+                  {executionTitle}
+                </div>
 
-              <span>
-                <strong>Υποχρεωτικά στοιχεία:</strong> μέγιστο ενοίκιο, ελάχιστο ενοίκιο,
-                αριθμός δωματίων
-              </span>
-            </div>
-
-            <button
-              className="search-button"
-              onClick={handleSearch}
-              disabled={loading}
-            >
-              {loading ? "Επεξεργασία..." : "Αναζήτηση"}
-            </button>
-          </div>
-        </section>
-
-        {message && (
-          <div
-            className={`status-message ${
-              isValid ? "status-success" : "status-error"
-            }`}
-          >
-            <span className="status-icon">
-              {isValid ? "✓" : "!"}
-            </span>
-
-            <span>{message}</span>
-          </div>
-        )}
+                <div className="execution-description">
+                  {executionDescription}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </div>
   );
