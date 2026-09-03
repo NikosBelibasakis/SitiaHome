@@ -1,13 +1,14 @@
 from fastapi import Body, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from components.prop_search import search_xe_properties
-from components.req_and_valid import (process_and_validate_requirements, UserRequirements)
+from components.req_and_valid import (process_and_validate_requirements)
 from components.rank_and_rec import select_properties
 
 
 
 matching_urls = []
 user_requirements = None
+
 
 app = FastAPI()
 
@@ -47,4 +48,3 @@ async def select_properties_main():
 
     selected_properties = await select_properties(matching_urls, user_requirements)
     return selected_properties
-    

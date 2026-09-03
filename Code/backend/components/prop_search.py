@@ -36,7 +36,8 @@ def fetch_xe_json():
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
-    container = soup.find("div",id="application_container")
+    container = soup.find("div", id="application_container")
+
     raw_json = container.get("data-json-data")
     decoded_json = html.unescape(raw_json)
     data = json.loads(decoded_json)
@@ -54,7 +55,7 @@ def parse_price(price: str) -> int:
     )
 
 
-def filter_xe_listings(data: dict, requirements: UserRequirements,) -> list[str]:
+def filter_xe_listings(data: dict, requirements: UserRequirements) -> list[str]:
 
     matching_urls = []
 
@@ -66,7 +67,8 @@ def filter_xe_listings(data: dict, requirements: UserRequirements,) -> list[str]
             bedrooms = 0
 
         if (
-            requirements.min_rent <= price <= requirements.max_rent
+            (requirements.min_rent is None or price >= requirements.min_rent)
+            and price <= requirements.max_rent
             and bedrooms >= requirements.min_bedrooms
         ):
             matching_urls.append(listing["url"])
@@ -74,10 +76,10 @@ def filter_xe_listings(data: dict, requirements: UserRequirements,) -> list[str]
     return matching_urls
 
 
-def search_xe_properties(requirements: UserRequirements,) -> list[str]:
+def search_xe_properties(requirements: UserRequirements) -> list[str]:
 
     data = fetch_xe_json()
 
-    matching_urls = filter_xe_listings(data,requirements)
+    matching_urls = filter_xe_listings(data, requirements)
 
-    return matching_urls 
+    return matching_urls
