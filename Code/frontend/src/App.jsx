@@ -68,8 +68,11 @@ function App() {
           );
 
           const selectedPropertiesResponse = await fetch(
-            "http://127.0.0.1:8000/select-properties"
-          );
+  "http://127.0.0.1:8000/select-properties",
+  {
+    method: "POST",
+  }
+);
 
           const selectedProperties =
             await selectedPropertiesResponse.json();
@@ -81,8 +84,6 @@ function App() {
             "Έχουν δημιουργηθεί τελικές προτάσεις για τις κατοικίες που πληρούν όσο το δυνατόν περισσότερο τις απαιτήσεις σας."
           );
         } else {
-          setRecommendations([]);
-
           setExecutionTitle("ΔΕΝ ΒΡΕΘΗΚΑΝ ΑΚΙΝΗΤΑ");
           setExecutionDescription(
             "Δεν βρέθηκε κατοικία που να πληροί τις απαιτήσεις σας. Παρακαλώ υποβάλετε νέο αίτημα."
@@ -93,8 +94,7 @@ function App() {
         setMessage(requirements.validation_message);
         setExecutionTitle("");
         setExecutionDescription("");
-        setRecommendations([]);
-      }
+         }
     } catch (error) {
       setIsValid(false);
       setMessage(

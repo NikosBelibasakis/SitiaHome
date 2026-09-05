@@ -140,19 +140,14 @@ async def get_properties_details(matching_urls: list[str]) -> list[PropertyListi
 # RECOMMENDATION / SELECTION
 # =========================================================
 
-async def select_properties(
-    matching_urls: list[str],
-    user_requirements: UserRequirements
-) -> list[FinalProperty]:
+async def select_properties(matching_urls: list[str], user_requirements: UserRequirements) -> list[FinalProperty]:
 
     properties = await get_properties_details(matching_urls)
 
     if not properties:
         return []
 
-    async def generate_property_opinion(
-        property: PropertyListing
-    ) -> FinalProperty | None:
+    async def generate_property_opinion(property: PropertyListing) -> FinalProperty | None:
 
         try:
             response = await client.responses.parse(

@@ -43,7 +43,7 @@ def search_properties():
 
 
 
-@app.get("/select-properties")
+@app.post("/select-properties")
 async def select_properties_main():
 
     selected_properties = await select_properties(matching_urls, user_requirements)
